@@ -16,7 +16,7 @@ lio_sam:
   useImuHeadingInitialization: true           # if using GPS data, set to "true"
   useGpsElevation: false                      # if GPS elevation is bad, set to "false"
   gpsCovThreshold: 2.0                        # m^2, threshold for using GPS data
-  poseCovThreshold: 25.0                      # m^2, threshold for using GPS data
+  poseCovThreshold: 5.0                      # m^2, threshold for using GPS data
   
   # Export settings
   savePCD: false                              # https://github.com/TixiaoShan/LIO-SAM/issues/3
@@ -24,9 +24,9 @@ lio_sam:
 
   # Sensor Settings
   sensor: velodyne                            # lidar sensor type, either 'velodyne' or 'ouster'
-  N_SCAN: 16                                  # number of lidar channel (i.e., 16, 32, 64, 128)
+  N_SCAN: 32                                  # number of lidar channel (i.e., 16, 32, 64, 128)
   Horizon_SCAN: 1800                          # lidar horizontal resolution (Velodyne:1800, Ouster:512,1024,2048)
-  downsampleRate: 1                           # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1
+  downsampleRate: 1                         # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1
   lidarMinRange: 1.0                          # default: 1.0, minimum lidar range to be used
   lidarMaxRange: 1000.0                       # default: 1000.0, maximum lidar range to be used
 
@@ -35,23 +35,19 @@ lio_sam:
   imuGyrNoise: 1.5636343949698187e-03
   imuAccBiasN: 6.4356659353532566e-05
   imuGyrBiasN: 3.5640318696367613e-05
-  imuGravity: 9.80511
+  imuGravity: 9.81505706177118
   imuRPYWeight: 0.01
 
   # Extrinsics (lidar -> IMU)
-  extrinsicTrans: [0.0, 0.0, 0.0]
-  extrinsicRot: [-1, 0, 0,
+  extrinsicTrans: [-0.805, 0.0, -1.3162]
+  #extrinsicRot:  [1,0,0,0,1,0,0,0,1]
+  #extrinsicRPY: [1,0,0,0,1,0,0,0,1]
+  extrinsicRot: [1, 0, 0,
                   0, 1, 0,
-                  0, 0, -1]
-  extrinsicRPY: [0,  1, 0,
-                 -1, 0, 0,
                   0, 0, 1]
-  # extrinsicRot: [1, 0, 0,
-  #                 0, 1, 0,
-  #                 0, 0, 1]
-  # extrinsicRPY: [1, 0, 0,
-  #                 0, 1, 0,
-  #                 0, 0, 1]
+  extrinsicRPY: [1, 0, 0,
+                  0, 1, 0,
+                  0, 0, 1]
 
   # LOAM feature threshold
   edgeThreshold: 1.0
