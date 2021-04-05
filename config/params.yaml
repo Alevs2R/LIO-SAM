@@ -4,7 +4,7 @@ lio_sam:
   pointCloudTopic: "points_raw"               # Point cloud data
   imuTopic: "imu_raw"                         # IMU data
   odomTopic: "odometry/imu"                   # IMU pre-preintegration odometry, same frequency as IMU
-  gpsTopic: "odometry/gpsz"                   # GPS odometry topic from navsat, see module_navsat.launch file
+  gpsTopic: "odometry/gps"                   # GPS odometry topic from navsat, see module_navsat.launch file
 
   # Frames
   lidarFrame: "base_link"
@@ -36,7 +36,7 @@ lio_sam:
   imuAccBiasN: 6.4356659353532566e-05
   imuGyrBiasN: 3.5640318696367613e-05
   imuGravity: 9.81505706177118
-  imuRPYWeight: 0.01
+  imuRPYWeight: 0.00
 
   # Extrinsics (lidar -> IMU)
   extrinsicTrans: [-0.805, 0.0, -1.3162]
@@ -117,7 +117,7 @@ ekf_gps:
   # -------------------------------------
   # External IMU:
   # -------------------------------------
-  imu0: imu_correct
+  imu0: imu_raw
   # make sure the input is aligned with ROS REP105. "imu_correct" is manually transformed by myself. EKF can also transform the data using tf between your imu and base_link
   imu0_config: [false, false, false,
                 true,  true,  true,
