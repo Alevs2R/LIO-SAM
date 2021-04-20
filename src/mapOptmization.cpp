@@ -792,6 +792,9 @@ public:
             transformTobeMapped[1] = cloudInfo.imuPitchInit;
             transformTobeMapped[2] = cloudInfo.imuYawInit;
 
+
+            ROS_INFO("imuYawInit %f", cloudInfo.imuYawInit);
+
             if (!useImuHeadingInitialization)
                 transformTobeMapped[2] = 0;
 
@@ -820,24 +823,35 @@ public:
                 lastImuPreTransformation = transBack;
 
                 lastImuTransformation = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit); // save imu before return;
+                
+                // float x, y, z, roll, pitch, yaw;
+                // pcl::getTranslationAndEulerAngles(transIncre, x, y, z, roll, pitch, yaw);
+                // if (sqrt(x*x + y*y + z*z) > 3) {
+                //     printf("odom initial guess %f\n", sqrt(x*x + y*y + z*z));
+                // }
+                
                 return;
             }
         }
 
         // use imu incremental estimation for pose guess (only rotation)
-        if (cloudInfo.imuAvailable == true)
-        {
-            Eigen::Affine3f transBack = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit);
-            Eigen::Affine3f transIncre = lastImuTransformation.inverse() * transBack;
+        // if (cloudInfo.imuAvailable == true)
+        // {
+        //     Eigen::Affine3f transBack = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit);
+        //     Eigen::Affine3f transIncre = lastImuTransformation.inverse() * transBack;
 
-            Eigen::Affine3f transTobe = trans2Affine3f(transformTobeMapped);
-            Eigen::Affine3f transFinal = transTobe * transIncre;
-            pcl::getTranslationAndEulerAngles(transFinal, transformTobeMapped[3], transformTobeMapped[4], transformTobeMapped[5], 
-                                                          transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]);
-
-            lastImuTransformation = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit); // save imu before return;
-            return;
-        }
+        //     Eigen::Affine3f transTobe = trans2Affine3f(transformTobeMapped);
+        //     Eigen::Affine3f transFinal = transTobe * transIncre;
+        //     pcl::getTranslationAndEulerAngles(transFinal, transformTobeMapped[3], transformTobeMapped[4], transformTobeMapped[5], 
+        //                                                   transformTobeMapped[0], transformTobeMapped[1], transformTobeMapped[2]);
+            
+        //     float x, y, z, roll, pitch, yaw;
+        //     pcl::getTranslationAndEulerAngles(transIncre, x, y, z, roll, pitch, yaw);
+        //     printf("imu initial guess %f\n", sqrt(x*x + y*y + z*z));
+            
+        //     lastImuTransformation = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit); // save imu before return;
+        //     return;
+        // }
     }
 
     void extractForLoopClosure()
@@ -1359,6 +1373,8 @@ public:
         float x, y, z, roll, pitch, yaw;
         pcl::getTranslationAndEulerAngles(transBetween, x, y, z, roll, pitch, yaw);
 
+        // printf("dist %f\n\n", sqrt(x*x + y*y + z*z));
+
         if (abs(roll)  < surroundingkeyframeAddingAngleThreshold &&
             abs(pitch) < surroundingkeyframeAddingAngleThreshold && 
             abs(yaw)   < surroundingkeyframeAddingAngleThreshold &&
@@ -1399,22 +1415,26 @@ public:
         }
 
         // pose covariance small, no need to correct
-        if (poseCovariance(3,3) < poseCovThreshold && poseCovariance(4,4) < poseCovThreshold)
+        if (poseCovariance(3,3) < poseCovThreshold && poseCovariance(4,4) < poseCovThreshold) {
+            ROS_INFO("pos covariance 3 %f; 4 %f\n", poseCovariance(3,3), poseCovariance(4,4));
             return;
+        }
 
         // last gps position
         static PointType lastGPSPoint;
 
         while (!gpsQueue.empty())
         {
-            if (gpsQueue.front().header.stamp.toSec() < timeLaserInfoCur - 0.2)
+            if (gpsQueue.front().header.stamp.toSec() < timeLaserInfoCur - 0.1)
             {
                 // message too old
                 gpsQueue.pop_front();
+                // ROS_INFO("msg too old");
             }
-            else if (gpsQueue.front().header.stamp.toSec() > timeLaserInfoCur + 0.2)
+            else if (gpsQueue.front().header.stamp.toSec() > timeLaserInfoCur + 0.1)
             {
                 // message too new
+                ROS_INFO("msg too new");
                 break;
             }
             else
@@ -1429,9 +1449,9 @@ public:
                 if (noise_x > gpsCovThreshold || noise_y > gpsCovThreshold)
                     continue;
 
-                float gps_x = thisGPS.pose.pose.position.x;
-                float gps_y = thisGPS.pose.pose.position.y;
-                float gps_z = thisGPS.pose.pose.position.z;
+                double gps_x = thisGPS.pose.pose.position.x;
+                double gps_y = thisGPS.pose.pose.position.y;
+                double gps_z = thisGPS.pose.pose.position.z;
                 if (!useGpsElevation)
                 {
                     gps_z = transformTobeMapped[5];
@@ -1447,16 +1467,19 @@ public:
                 curGPSPoint.x = gps_x;
                 curGPSPoint.y = gps_y;
                 curGPSPoint.z = gps_z;
-                if (pointDistance(curGPSPoint, lastGPSPoint) < 5.0)
+                if (pointDistance(curGPSPoint, lastGPSPoint) < 5.0) {
+                    ROS_INFO("point distance too small");
                     continue;
-                else
+                } else {
                     lastGPSPoint = curGPSPoint;
-
+                }
                 gtsam::Vector Vector3(3);
                 Vector3 << max(noise_x, 1.0f), max(noise_y, 1.0f), max(noise_z, 1.0f);
                 noiseModel::Diagonal::shared_ptr gps_noise = noiseModel::Diagonal::Variances(Vector3);
                 gtsam::GPSFactor gps_factor(cloudKeyPoses3D->size(), gtsam::Point3(gps_x, gps_y, gps_z), gps_noise);
                 gtSAMgraph.add(gps_factor);
+
+                ROS_INFO("add gps factor");
 
                 aLoopIsClosed = true;
                 break;
