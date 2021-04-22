@@ -22,7 +22,7 @@
   <joint name="velodyne_joint" type="fixed">
     <parent link="chassis_link" />
     <child link="velodyne" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="-0.0035219 0.0256178 -0.0082929" />
   </joint>
 
   <link name="gps_link"> </link>
