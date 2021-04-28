@@ -34,6 +34,7 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
+#include <tf_conversions/tf_eigen.h>
  
 #include <vector>
 #include <cmath>

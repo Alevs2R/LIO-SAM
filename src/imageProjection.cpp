@@ -84,6 +84,8 @@ private:
     double timeScanEnd;
     std_msgs::Header cloudHeader;
 
+    tf::TransformListener tfListener;
+    Eigen::Affine3d calibrationTransform;
 
 public:
     ImageProjection():
@@ -100,6 +102,11 @@ public:
         resetParameters();
 
         pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+
+        tf::StampedTransform baselink2Lidar;
+        tfListener.waitForTransform("velodyne", "base_link", ros::Time(0), ros::Duration(3.0));
+        tfListener.lookupTransform("velodyne", "base_link", ros::Time(0), baselink2Lidar);
+        tf::transformTFToEigen(baselink2Lidar, calibrationTransform);
     }
 
     void allocateMemory()
@@ -181,6 +188,8 @@ public:
         if (!deskewInfo())
             return;
 
+        // applyCalibration();
+
         projectPointCloud();
 
         cloudExtraction();
@@ -189,6 +198,12 @@ public:
 
         resetParameters();
     }
+
+    void applyCalibration() {
+        ROS_INFO_STREAM(calibrationTransform.matrix());
+        pcl::transformPointCloud (*laserCloudIn, *laserCloudIn, calibrationTransform.matrix());
+    }
+
 
     bool cachePointCloud(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
     {
