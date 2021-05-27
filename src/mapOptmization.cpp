@@ -381,7 +381,9 @@ public:
 
           // save separate keyframe 
           std::ostringstream path_stream;
-          path_stream << saveMapDirectory << "/keyframes/" << i << ".pcd";
+
+          // append leading zeros for easy sorting          
+          path_stream << saveMapDirectory << "/keyframes/" << std::setw(7) << std::setfill('0') << i << ".pcd";
           pcl::io::savePCDFileBinary(path_stream.str(), *deskewCloudKeyFrames[i]);
           
           cout << "\r" << std::flush << "Processing feature cloud " << i << " of " << cloudKeyPoses6D->size() << " ...";
