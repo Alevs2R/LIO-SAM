@@ -1605,7 +1605,7 @@ public:
         // save key frame cloud
         cornerCloudKeyFrames.push_back(thisCornerKeyFrame);
         surfCloudKeyFrames.push_back(thisSurfKeyFrame);
-        deskewCloudKeyFrames.push_back(laserCloudDeskewLast);
+        deskewCloudKeyFrames.push_back(thisDeskewKeyFrame);
         
         // save path for visualization
         updatePath(thisPose6D);
