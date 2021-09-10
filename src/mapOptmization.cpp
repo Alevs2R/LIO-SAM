@@ -367,8 +367,10 @@ public:
       unused = system((std::string("mkdir -p ") + saveMapDirectory).c_str());
       unused = system((std::string("mkdir -p ") + saveMapDirectory + std::string("/keyframes")).c_str());
       // save key frame transformations
-      pcl::io::savePCDFileBinary(saveMapDirectory + "/trajectory.pcd", *cloudKeyPoses3D);
-      pcl::io::savePCDFileBinary(saveMapDirectory + "/transformations.pcd", *cloudKeyPoses6D);
+      pcl::io::savePCDFileASCII(saveMapDirectory + "/trajectory.txt", *cloudKeyPoses3D);
+
+      pcl::PCDWriter w;
+      w.writeASCII(saveMapDirectory + "/transformations.txt", *cloudKeyPoses6D, 19);
       // extract global point cloud map
       pcl::PointCloud<PointType>::Ptr globalCornerCloud(new pcl::PointCloud<PointType>());
       pcl::PointCloud<PointType>::Ptr globalCornerCloudDS(new pcl::PointCloud<PointType>());
@@ -384,7 +386,7 @@ public:
 
           // append leading zeros for easy sorting          
           path_stream << saveMapDirectory << "/keyframes/" << std::setw(7) << std::setfill('0') << i << ".pcd";
-          pcl::io::savePCDFileBinary(path_stream.str(), *deskewCloudKeyFrames[i]);
+        //   pcl::io::savePCDFileBinary(path_stream.str(), *deskewCloudKeyFrames[i]);
           
           cout << "\r" << std::flush << "Processing feature cloud " << i << " of " << cloudKeyPoses6D->size() << " ...";
       }
@@ -806,7 +808,7 @@ public:
             transformTobeMapped[1] = cloudInfo.imuPitchInit;
             transformTobeMapped[2] = cloudInfo.imuYawInit;
 
-
+            
             ROS_INFO("imuYawInit %f", cloudInfo.imuYawInit);
 
             if (!useImuHeadingInitialization)
@@ -846,7 +848,7 @@ public:
                 
                 return;
             }
-        }
+        } 
 
         // use imu incremental estimation for pose guess (only rotation)
         // if (cloudInfo.imuAvailable == true)
